@@ -28,11 +28,14 @@ Sources (mock data):
 [I1] Demo remote work policy (mock://internal/remote-work)
 ```
 
-Enter `exit` or press Ctrl-D to quit. The CLI keeps conversation context during
-the session. You can set the conversation ID and per-turn tool-call limit:
+Enter `exit` or press Ctrl-D to quit. Conversations are saved by default in
+`.provectus/checkpoints.sqlite` (relative to the directory where you run the
+command). Reuse the same thread ID and checkpoint file to continue a conversation
+after restarting the CLI. You can set the conversation ID, checkpoint file, and
+per-turn tool-call limit:
 
 ```sh
-uv run provectus --thread-id demo --max-tool-calls 2
+uv run provectus --thread-id demo --checkpoint-path .provectus/checkpoints.sqlite --max-tool-calls 2
 ```
 
 If dependencies are already installed, `.venv/bin/provectus` also starts the CLI
@@ -43,15 +46,20 @@ on macOS and Linux.
 ```python
 from provectus import ResearchAgent
 
-agent = ResearchAgent(max_tool_calls=2)
-reply = agent.ask("What is our remote work policy?", thread_id="demo-user")
-print(reply.answer)
+with ResearchAgent(max_tool_calls=2) as agent:
+    reply = agent.ask("What is our remote work policy?", thread_id="demo-user")
+    print(reply.answer)
 ```
 
-The default `InMemorySaver` checkpoint keeps turns while the process runs. To
-retain conversations across restarts, pass a durable LangGraph checkpointer to
-`ResearchAgent(checkpointer=...)`. Search adapters can be replaced through
+The default SQLite checkpoint retains turns across restarts. Set
+`checkpoint_path` to use another file, or pass a LangGraph `checkpointer` for a
+different storage backend. Close the agent when finished, preferably with
+`with ResearchAgent(...) as agent:`. Search adapters can be replaced through
 `rag_search` and `web_search`; the built-in adapters return synthetic data.
+External calls have a 30-second timeout by default. Set `call_timeout_seconds`
+and `max_in_flight_calls` to change the latency and unfinished-call limits. A
+timed-out call stops blocking the answer but may continue in a background thread;
+real search adapters should also set timeouts on their own network clients.
 
 ## Test
 
