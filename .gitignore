@@ -1,0 +1,26 @@
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+
+# Local configuration
+.env
+.env.*
+!.env.example
+.DS_Store
